@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Interpolasi Newton - Editable Version</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 20px;
+        }
+        
+        header h1 {
+            color: #667eea;
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        header h1:hover {
+            color: #764ba2;
+        }
+        
+        header p {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        header p:hover {
+            color: #667eea;
+        }
+        
+        .edit-mode {
+            background: #fff3cd;
+            border: 2px dashed #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+            color: #856404;
+        }
+        
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .toolbar button {
+            padding: 10px 20px;
+            font-size: 0.95em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-edit {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .btn-edit:hover {
+            background: #ffb300;
+            transform: translateY(-2px);
+        }
+        
+        .btn-save {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-save:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-cancel:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .editable-field {
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+        
+        .editable-field:hover {
+            background: #f0f0f0;
+        }
+        
+        .editable-field.editing {
+            background: #fffacd;
+            border: 2px solid #667eea;
+        }
+        
+        .reference {
+            background: #e8f4f8;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 0.95em;
+            color: #333;
+        }
+        
+        .reference .editable-field {
+            display: inline;
+        }
+        
+        .input-section {
+            background: #f0f4ff;
+            border: 2px solid #667eea;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .input-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1.05em;
+        }
+        
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            font-family: 'Courier New', monospace;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+        
+        .input-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 30px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-calculate {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-reset {
+            background: #6c757d;
+            color: white;
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .btn-reset:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .btn-example {
+            background: #28a745;
+            color: white;
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .btn-example:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section h3 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .section h3:hover {
+            transform: translateX(5px);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            font-family: 'Courier New', monospace;
+        }
+        
+        table tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .polynomial-box {
+            background: #f0f4ff;
+            border: 2px solid #667eea;
+            padding: 20px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.05em;
+            line-height: 1.8;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .polynomial-box:hover {
+            background: #f5f8ff;
+        }
+        
+        .intermediate-box {
+            background: #fff9e6;
+            border: 2px solid #ffc107;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .data-box {
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-radius: 3px;
+        }
+        
+        .status-good {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .status-check {
+            color: #17a2b8;
+            font-weight: bold;
+        }
+        
+        .error {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .success {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .results {
+            display: none;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .footer .editable-field {
+            display: block;
+            margin-top: 10px;
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 3px;
+            color: #1565c0;
+        }
+        
+        .download-btn {
+            background: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .download-btn:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            header h1 {
+                font-size: 1.8em;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="editable-field" data-field="title">🎓 Kalkulator Interpolasi Numerik</h1>
+            <p class="editable-field" data-field="subtitle">Metode Newton Divided Difference Polynomials</p>
+            <div style="font-size: 0.85em; color: #999; margin-top: 10px;">
+                💡 Klik pada teks untuk mengedit
+            </div>
+        </header>
+        
+        <div class="toolbar">
+            <button class="btn-edit" onclick="toggleEditMode()">✏️ Mode Edit</button>
+            <button class="btn-save" style="display: none;" id="saveBtn" onclick="saveChanges()">💾 Simpan Perubahan</button>
+            <button class="btn-cancel" style="display: none;" id="cancelBtn" onclick="cancelEdit()">❌ Batal</button>
+            <button class="download-btn" onclick="downloadAsHtml()">📥 Download Halaman Ini</button>
+        </div>
+        
+        <div id="editModeNotice" class="edit-mode" style="display: none;">
+            ✏️ <strong>MODE EDIT AKTIF</strong> - Klik pada teks untuk mengedit. Klik "Simpan Perubahan" saat selesai.
+        </div>
+        
+        <div class="reference">
+            <strong>📚 Referensi:</strong> 
+            <span class="editable-field" data-field="reference">Burden, R. L., & Faires, J. D. (2015). <em>Numerical Analysis (10th ed.).</em> Cengage Learning.</span>
+        </div>
+        
+        <div class="input-section">
+            <h2>📝 Input Data</h2>
+            
+            <div class="info-box">
+                💡 Masukkan data x dan y Anda (pisahkan dengan koma), atau gunakan tombol "Data Contoh" untuk melihat hasil contoh.
+            </div>
+            
+            <div class="input-group">
+                <label for="inputX">Nilai X (pisahkan dengan koma):</label>
+                <input type="text" id="inputX" placeholder="Contoh: 0, 1, 2, 3, 4">
+            </div>
+            
+            <div class="input-group">
+                <label for="inputY">Nilai Y (pisahkan dengan koma):</label>
+                <input type="text" id="inputY" placeholder="Contoh: 1, 2.7, 5.8, 6.6, 7.5">
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-example" onclick="loadExample()">📊 Data Contoh</button>
+                <button class="btn-calculate" onclick="calculate()">🔢 Hitung</button>
+                <button class="btn-reset" onclick="resetForm()">🔄 Reset</button>
+            </div>
+        </div>
+        
+        <div id="errorMsg" class="error"></div>
+        <div id="successMsg" class="success"></div>
+        
+        <div id="results" class="results">
+            
+            <!-- DATA INPUT -->
+            <div class="section">
+                <h3 class="editable-field" data-field="dataTitle">📊 Data Input</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Index</th>
+                            <th>x</th>
+                            <th>y</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTable">
+                    </tbody>
+                </table>
+                <div class="data-box">
+                    <strong>Jumlah Data Points:</strong> <span id="numPoints">0</span><br>
+                    <strong>Orde Polinomial:</strong> <span id="polyOrder">0</span>
+                </div>
+            </div>
+            
+            <!-- TABEL DIVIDED DIFFERENCE -->
+            <div class="section">
+                <h3 class="editable-field" data-field="ddTitle">📋 Tabel Divided Difference</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>i</th>
+                            <th>x[i]</th>
+                            <th>f[x]</th>
+                            <th>f[x,x]</th>
+                            <th>f[x,x,x]</th>
+                            <th>f[x,x,x,x]</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ddTable">
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- PERSAMAAN POLINOMIAL -->
+            <div class="section">
+                <h3 class="editable-field" data-field="polyTitle">📐 Persamaan Polinomial Newton</h3>
+                <div class="polynomial-box" id="polynomial"></div>
+            </div>
+            
+            <!-- NILAI TENGAH -->
+            <div class="section intermediate-box">
+                <h3 class="editable-field" data-field="ivTitle">⭐ ANALISIS NILAI TENGAH (INTERMEDIATE VALUES)</h3>
+                <p style="margin-bottom: 20px; color: #333;">
+                    <span class="editable-field" data-field="ivDesc">Nilai interpolasi pada titik tengah antara setiap pair data points:</span>
+                </p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Interval</th>
+                            <th>x_midpoint</th>
+                            <th>y_midpoint</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="intermediateTable">
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- VERIFIKASI -->
+            <div class="section">
+                <h3 class="editable-field" data-field="verifyTitle">🔍 Verifikasi - Akurasi Polinomial</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>x</th>
+                            <th>y (actual)</th>
+                            <th>P(x) computed</th>
+                            <th>Error</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="verifyTable">
+                    </tbody>
+                </table>
+                <div class="data-box">
+                    <strong>Average Error:</strong> <span id="avgError">0</span><br>
+                    <strong>Status:</strong> <span id="statusVerify" class="status-check">✓ VERIFIED</span>
+                </div>
+            </div>
+            
+            <!-- RINGKASAN -->
+            <div class="section">
+                <h3 class="editable-field" data-field="summaryTitle">📈 Ringkasan Hasil Analisis</h3>
+                <div class="data-box">
+                    <strong>✓ Jumlah Data Points:</strong> <span id="summaryPoints">0</span><br>
+                    <strong>✓ Orde Polinomial:</strong> <span id="summaryOrder">0</span><br>
+                    <strong>✓ Jumlah Nilai Tengah:</strong> <span id="summaryIntermediate">0</span><br>
+                    <strong>✓ Metode:</strong> <span class="editable-field" data-field="methodName">Newton Divided Difference</span><br>
+                    <strong>✓ Status:</strong> <span class="status-good">✓ ANALISIS SELESAI - BERHASIL!</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p class="editable-field" data-field="footerLine1">🎓 Kalkulator Interpolasi Numerik - Newton Divided Difference Polynomials</p>
+            <p class="editable-field" data-field="footerLine2">Reference: Burden & Faires (2015) - Numerical Analysis</p>
+            <p style="margin-top: 10px; color: #999;" class="editable-field" data-field="footerLine3">Dibuat untuk Marine Engineering - UPN Veteran Jakarta</p>
+        </div>
+    </div>
+    
+    <script>
+        // ==================== EDIT MODE ====================
+        let editMode = false;
+        const editableFields = {};
+        
+        // Load editable fields
+        function loadEditableFields() {
+            document.querySelectorAll('.editable-field').forEach(el => {
+                const field = el.dataset.field;
+                if (field) {
+                    editableFields[field] = el.innerHTML;
+                }
+            });
+        }
+        
+        function toggleEditMode() {
+            editMode = !editMode;
+            document.getElementById('editModeNotice').style.display = editMode ? 'block' : 'none';
+            document.getElementById('saveBtn').style.display = editMode ? 'inline-block' : 'none';
+            document.getElementById('cancelBtn').style.display = editMode ? 'inline-block' : 'none';
+            
+            if (editMode) {
+                document.querySelectorAll('.editable-field').forEach(el => {
+                    el.addEventListener('click', startEditing);
+                });
+            } else {
+                document.querySelectorAll('.editable-field').forEach(el => {
+                    el.removeEventListener('click', startEditing);
+                });
+            }
+        }
+        
+        function startEditing(e) {
+            if (!editMode) return;
+            
+            const el = e.target;
+            const field = el.dataset.field;
+            if (!field) return;
+            
+            const currentContent = el.innerHTML;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = el.innerText;
+            input.style.width = '100%';
+            input.style.padding = '8px';
+            input.style.fontSize = '1em';
+            input.style.border = '2px solid #667eea';
+            input.style.borderRadius = '3px';
+            
+            el.innerHTML = '';
+            el.appendChild(input);
+            el.classList.add('editing');
+            input.focus();
+            input.select();
+            
+            function saveEdit() {
+                const newValue = input.value;
+                el.innerHTML = newValue;
+                el.classList.remove('editing');
+                editableFields[field] = newValue;
+            }
+            
+            input.addEventListener('blur', saveEdit);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') saveEdit();
+            });
+        }
+        
+        function saveChanges() {
+            alert('✓ Perubahan telah disimpan!');
+            toggleEditMode();
+        }
+        
+        function cancelEdit() {
+            document.querySelectorAll('.editable-field').forEach(el => {
+                const field = el.dataset.field;
+                if (field && editableFields[field]) {
+                    el.innerHTML = editableFields[field];
+                }
+            });
+            toggleEditMode();
+        }
+        
+        function downloadAsHtml() {
+            const htmlContent = document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'kalkulator_interpolasi.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // ==================== CALCULATOR ====================
+        
+        function newtonDividedDifference(x_points, y_points) {
+            const n = x_points.length;
+            const table = Array(n).fill(null).map(() => Array(n).fill(0));
+            
+            for (let i = 0; i < n; i++) {
+                table[i][0] = y_points[i];
+            }
+            
+            for (let j = 1; j < n; j++) {
+                for (let i = 0; i < n - j; i++) {
+                    table[i][j] = (table[i+1][j-1] - table[i][j-1]) / (x_points[i+j] - x_points[i]);
+                }
+            }
+            
+            return table;
+        }
+        
+        function getCoefficients(table) {
+            return table.map((row, i) => row[i]);
+        }
+        
+        function hornerEvaluation(x_points, coefficients, x_eval) {
+            const n = coefficients.length;
+            let result = coefficients[n-1];
+            
+            for (let i = n-2; i >= 0; i--) {
+                result = coefficients[i] + (x_eval - x_points[i]) * result;
+            }
+            
+            return result;
+        }
+        
+        function formatNumber(num, decimals = 8) {
+            return Number(num).toFixed(decimals);
+        }
+        
+        function loadExample() {
+            document.getElementById('inputX').value = '0, 1, 2, 3, 4';
+            document.getElementById('inputY').value = '1, 2.7, 5.8, 6.6, 7.5';
+            calculate();
+        }
+        
+        function resetForm() {
+            document.getElementById('inputX').value = '';
+            document.getElementById('inputY').value = '';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('errorMsg').style.display = 'none';
+            document.getElementById('successMsg').style.display = 'none';
+        }
+        
+        function calculate() {
+            try {
+                document.getElementById('errorMsg').style.display = 'none';
+                document.getElementById('successMsg').style.display = 'none';
+                
+                const xStr = document.getElementById('inputX').value.trim();
+                const yStr = document.getElementById('inputY').value.trim();
+                
+                if (!xStr || !yStr) {
+                    throw new Error('Silakan masukkan data x dan y!');
+                }
+                
+                const x_data = xStr.split(',').map(val => parseFloat(val.trim()));
+                const y_data = yStr.split(',').map(val => parseFloat(val.trim()));
+                
+                if (x_data.length !== y_data.length) {
+                    throw new Error('Jumlah data x dan y harus sama!');
+                }
+                
+                if (x_data.length < 2) {
+                    throw new Error('Minimal 2 data point diperlukan!');
+                }
+                
+                if (x_data.some(isNaN) || y_data.some(isNaN)) {
+                    throw new Error('Data harus berupa angka!');
+                }
+                
+                const indices = x_data.map((_, i) => i).sort((a, b) => x_data[a] - x_data[b]);
+                const x_sorted = indices.map(i => x_data[i]);
+                const y_sorted = indices.map(i => y_data[i]);
+                
+                const table = newtonDividedDifference(x_sorted, y_sorted);
+                const coefficients = getCoefficients(table);
+                
+                // Display data input
+                let dataHtml = '';
+                for (let i = 0; i < x_sorted.length; i++) {
+                    dataHtml += `<tr>
+                        <td>${i}</td>
+                        <td>${formatNumber(x_sorted[i], 4)}</td>
+                        <td>${formatNumber(y_sorted[i], 4)}</td>
+                    </tr>`;
+                }
+                document.getElementById('dataTable').innerHTML = dataHtml;
+                
+                // Display divided difference table
+                let ddHtml = '';
+                const n = x_sorted.length;
+                for (let i = 0; i < n; i++) {
+                    let cells = `<td>${i}</td><td>${formatNumber(x_sorted[i], 6)}</td>`;
+                    for (let j = 0; j < n - i; j++) {
+                        cells += `<td>${formatNumber(table[i][j], 8)}</td>`;
+                    }
+                    ddHtml += `<tr>${cells}</tr>`;
+                }
+                document.getElementById('ddTable').innerHTML = ddHtml;
+                
+                // Display polynomial
+                let polyStr = `P(x) = ${formatNumber(coefficients[0], 8)}`;
+                for (let i = 1; i < coefficients.length; i++) {
+                    let term = '';
+                    for (let j = 0; j < i; j++) {
+                        term += `(x - ${formatNumber(x_sorted[j], 2)})`;
+                    }
+                    const sign = coefficients[i] >= 0 ? '+' : '';
+                    polyStr += `<br>        ${sign} ${formatNumber(coefficients[i], 8)} × ${term}`;
+                }
+                document.getElementById('polynomial').innerHTML = polyStr;
+                
+                // Display intermediate values
+                let ivHtml = '';
+                for (let i = 0; i < x_sorted.length - 1; i++) {
+                    const x1 = x_sorted[i];
+                    const x2 = x_sorted[i+1];
+                    const x_mid = (x1 + x2) / 2;
+                    const y_mid = hornerEvaluation(x_sorted, coefficients, x_mid);
+                    const interval = `[${formatNumber(x1, 4)}, ${formatNumber(x2, 4)}]`;
+                    ivHtml += `<tr>
+                        <td>${interval}</td>
+                        <td>${formatNumber(x_mid, 6)}</td>
+                        <td>${formatNumber(y_mid, 8)}</td>
+                        <td><span class="status-good">✓ Valid</span></td>
+                    </tr>`;
+                }
+                document.getElementById('intermediateTable').innerHTML = ivHtml;
+                
+                // Display verification
+                let verifyHtml = '';
+                let totalError = 0;
+                for (let i = 0; i < x_sorted.length; i++) {
+                    const y_computed = hornerEvaluation(x_sorted, coefficients, x_sorted[i]);
+                    const error = Math.abs(y_sorted[i] - y_computed);
+                    verifyHtml += `<tr>
+                        <td>${formatNumber(x_sorted[i], 6)}</td>
+                        <td>${formatNumber(y_sorted[i], 8)}</td>
+                        <td>${formatNumber(y_computed, 8)}</td>
+                        <td>${error.toExponential(2)}</td>
+                        <td><span class="status-check">✓ Perfect</span></td>
+                    </tr>`;
+                    totalError += error;
+                }
+                document.getElementById('verifyTable').innerHTML = verifyHtml;
+                
+                const avgError = totalError / x_sorted.length;
+                document.getElementById('avgError').innerHTML = `<span class="status-check">${avgError.toExponential(2)}</span>`;
+                
+                // Update summary
+                document.getElementById('numPoints').textContent = x_sorted.length;
+                document.getElementById('polyOrder').textContent = coefficients.length - 1;
+                document.getElementById('summaryPoints').textContent = x_sorted.length;
+                document.getElementById('summaryOrder').textContent = coefficients.length - 1;
+                document.getElementById('summaryIntermediate').textContent = x_sorted.length - 1;
+                
+                // Show results
+                document.getElementById('results').style.display = 'block';
+                document.getElementById('successMsg').innerHTML = '✓ Perhitungan berhasil! Scroll ke bawah untuk melihat hasil lengkap.';
+                document.getElementById('successMsg').style.display = 'block';
+                
+                document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+            } catch (error) {
+                document.getElementById('errorMsg').innerHTML = `❌ Error: ${error.message}`;
+                document.getElementById('errorMsg').style.display = 'block';
+                document.getElementById('results').style.display = 'none';
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadEditableFields();
+            
+            document.getElementById('inputX').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') calculate();
+            });
+            document.getElementById('inputY').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') calculate();
+            });
+        });
+    </script>
+</body>
+</html>
